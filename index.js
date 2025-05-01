@@ -97,7 +97,7 @@ async function handleNewUser(sock, sender) {
         .join("\n");
 
     await sock.sendMessage(sender, { 
-        text: `📅 *أرحب واهلا وسهلا بك في موقع منيو*\n\nاختر خدمة:\n${menuText}`
+        text: `📅 *مرحبا بك في شركة فيد*\n\nاختر خدمة:\n${menuText}`
     });
     respondedMessages.set(sender, "MAIN_MENU");
 }
@@ -174,7 +174,20 @@ app.post("/options", async (req, res) => {
     try {
         const newOption = req.body;
         const options = await loadOptions();
-        options.options.push(newOption);
+        
+        // تحديد موقع إدراج الخيار الجديد
+        const insertIndex = options.options.findIndex(opt => 
+            parseInt(opt.id) > parseInt(newOption.id)
+        );
+        
+        if (insertIndex === -1) {
+            // إذا كان الرقم أكبر من جميع الخيارات الموجودة، أضفه في النهاية
+            options.options.push(newOption);
+        } else {
+            // إدراج الخيار في موقعه المناسب
+            options.options.splice(insertIndex, 0, newOption);
+        }
+        
         await saveOptions(options);
         res.json({ success: true });
     } catch (error) {
